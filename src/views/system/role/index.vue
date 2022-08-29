@@ -16,29 +16,6 @@
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="form.name" style="width: 380px;" />
         </el-form-item>
-        <el-form-item label="角色级别" prop="level">
-          <el-input-number v-model.number="form.level" :min="1" controls-position="right" style="width: 145px;" />
-        </el-form-item>
-        <el-form-item label="数据范围" prop="dataScope">
-          <el-select v-model="form.dataScope" style="width: 140px" placeholder="请选择数据范围" @change="changeScope">
-            <el-option
-              v-for="item in dateScopes"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="form.dataScope === '自定义'" label="数据权限" prop="depts">
-          <treeselect
-            v-model="deptDatas"
-            :load-options="loadDepts"
-            :options="depts"
-            multiple
-            style="width: 380px"
-            placeholder="请选择"
-          />
-        </el-form-item>
         <el-form-item label="描述信息" prop="description">
           <el-input v-model="form.description" style="width: 380px;" rows="5" type="textarea" />
         </el-form-item>
@@ -56,10 +33,8 @@
             <span class="role-span">角色列表</span>
           </div>
           <el-table ref="table" v-loading="crud.loading" highlight-current-row style="width: 100%;" :data="crud.data" @selection-change="crud.selectionChangeHandler" @current-change="handleCurrentChange">
-            <el-table-column :selectable="checkboxT" type="selection" width="55" />
+            <el-table-column prop="id" v-permission="['admin','roles:edit']" type="selection" width="55" />
             <el-table-column prop="name" label="名称" />
-            <el-table-column prop="dataScope" label="数据权限" />
-            <el-table-column prop="level" label="角色级别" />
             <el-table-column :show-overflow-tooltip="true" prop="description" label="描述" />
             <el-table-column :show-overflow-tooltip="true" width="135px" prop="createTime" label="创建日期" />
             <el-table-column v-if="checkPer(['admin','roles:edit','roles:del'])" label="操作" width="130px" align="center" fixed="right">
@@ -85,7 +60,6 @@
             </el-tooltip>
             <el-button
               v-permission="['admin','roles:edit']"
-              :disabled="!showButton"
               :loading="menuLoading"
               icon="el-icon-check"
               size="mini"
@@ -115,7 +89,6 @@
 
 <script>
 import crudRoles from '@/api/system/role'
-import { getDepts, getDeptSuperior } from '@/api/system/dept'
 import { getMenusTree, getChild } from '@/api/system/menu'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
@@ -127,12 +100,16 @@ import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 import { LOAD_CHILDREN_OPTIONS } from '@riophae/vue-treeselect'
 import DateRangePicker from '@/components/DateRangePicker'
 
-const defaultForm = { id: null, name: null, depts: [], description: null, dataScope: '全部', level: 3 }
+const defaultForm = { id: null, name: null, description: null}
 export default {
   name: 'Role',
   components: { Treeselect, pagination, crudOperation, rrOperation, udOperation, DateRangePicker },
   cruds() {
-    return CRUD({ title: '角色', url: 'api/roles', sort: 'level,asc', crudMethod: { ...crudRoles }})
+    return CRUD({ title: '角色', url: 'api/roles', crudMethod: { ...crudRoles }, optShow: {
+      add: true,
+      download: false,
+      reset: true
+    }})
   },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
@@ -156,11 +133,7 @@ export default {
       }
     }
   },
-  created() {
-    crudRoles.getLevel().then(data => {
-      this.level = data.level
-    })
-  },
+  created() {},
   methods: {
     getMenuDatas(node, resolve) {
       setTimeout(() => {
@@ -179,35 +152,10 @@ export default {
     },
     // 编辑前初始化自定义数据权限的部门信息
     [CRUD.HOOK.beforeToEdit](crud, form) {
-      this.deptDatas = []
-      if (form.dataScope === '自定义') {
-        this.getSupDepts(form.depts)
-      }
-      const _this = this
-      form.depts.forEach(function(dept) {
-        _this.deptDatas.push(dept.id)
-      })
-      // 将角色的菜单清空，避免日志入库数据过长
       form.menus = null
     },
     // 提交前做的操作
     [CRUD.HOOK.afterValidateCU](crud) {
-      if (crud.form.dataScope === '自定义' && this.deptDatas.length === 0) {
-        this.$message({
-          message: '自定义数据权限不能为空',
-          type: 'warning'
-        })
-        return false
-      } else if (crud.form.dataScope === '自定义') {
-        const depts = []
-        this.deptDatas.forEach(function(data) {
-          const dept = { id: data }
-          depts.push(dept)
-        })
-        crud.form.depts = depts
-      } else {
-        crud.form.depts = []
-      }
       return true
     },
     // 触发单选
@@ -277,63 +225,6 @@ export default {
           }
         }
       })
-    },
-    // 获取部门数据
-    getDepts() {
-      getDepts({ enabled: true }).then(res => {
-        this.depts = res.content.map(function(obj) {
-          if (obj.hasChildren) {
-            obj.children = null
-          }
-          return obj
-        })
-      })
-    },
-    getSupDepts(depts) {
-      const ids = []
-      depts.forEach(dept => {
-        ids.push(dept.id)
-      })
-      getDeptSuperior(ids).then(res => {
-        const date = res.content
-        this.buildDepts(date)
-        this.depts = date
-      })
-    },
-    buildDepts(depts) {
-      depts.forEach(data => {
-        if (data.children) {
-          this.buildDepts(data.children)
-        }
-        if (data.hasChildren && !data.children) {
-          data.children = null
-        }
-      })
-    },
-    // 获取弹窗内部门数据
-    loadDepts({ action, parentNode, callback }) {
-      if (action === LOAD_CHILDREN_OPTIONS) {
-        getDepts({ enabled: true, pid: parentNode.id }).then(res => {
-          parentNode.children = res.content.map(function(obj) {
-            if (obj.hasChildren) {
-              obj.children = null
-            }
-            return obj
-          })
-          setTimeout(() => {
-            callback()
-          }, 200)
-        })
-      }
-    },
-    // 如果数据权限为自定义则获取部门数据
-    changeScope() {
-      if (this.form.dataScope === '自定义') {
-        this.getDepts()
-      }
-    },
-    checkboxT(row) {
-      return row.level >= this.level
     }
   }
 }
