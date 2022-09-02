@@ -4,33 +4,59 @@
       <h3 class="title">
         Cipherkeeper 管理系统
       </h3>
-      <el-form-item prop="username">
-        <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
-          <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
-        </el-input>
-      </el-form-item>
-      <el-form-item prop="password">
-        <el-input v-model="loginForm.password" type="password" auto-complete="off" placeholder="密码" @keyup.enter.native="handleLogin">
-          <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
-        </el-input>
-      </el-form-item>
-      <el-form-item prop="code">
-        <el-input v-model="loginForm.code" auto-complete="off" placeholder="验证码" style="width: 63%" @keyup.enter.native="handleLogin">
-          <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
-        </el-input>
-        <div class="login-code">
-          <img :src="codeUrl" @click="getCode">
-        </div>
-      </el-form-item>
-      <el-checkbox v-model="loginForm.rememberMe" style="margin:0 0 25px 0;">
-        记住我
-      </el-checkbox>
-      <el-form-item style="width:100%;">
-        <el-button :loading="loading" size="medium" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
-          <span v-if="!loading">登 录</span>
-          <span v-else>登 录 中...</span>
-        </el-button>
-      </el-form-item>
+      <el-tabs type="border-card" @tab-click="handleTabClick">
+        <el-tab-pane label="用户密码登陆">
+          <el-form-item prop="username">
+            <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
+              <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input v-model="loginForm.password" type="password" auto-complete="off" placeholder="密码" @keyup.enter.native="handleLogin">
+              <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="code">
+            <el-input v-model="loginForm.code" auto-complete="off" placeholder="验证码" style="width: 63%" @keyup.enter.native="handleLogin">
+              <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
+            </el-input>
+            <div class="login-code">
+              <img :src="codeUrl" @click="getCode">
+            </div>
+          </el-form-item>
+          <el-checkbox v-model="loginForm.rememberMe" style="margin:0 0 25px 0;">
+            记住我
+          </el-checkbox>
+          <el-form-item style="width:100%;">
+            <el-button :loading="loading" size="medium" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
+              <span v-if="!loading">登 录</span>
+              <span v-else>登 录 中...</span>
+            </el-button>
+          </el-form-item>
+        </el-tab-pane>
+        <el-tab-pane label="USBKEY登陆">
+          <el-form-item prop="deviceNo">
+            <el-input v-model="loginForm.deviceNo" type="text" auto-complete="off" :disabled="true" placeholder="UKEY设备号">
+              <svg-icon slot="prefix" icon-class="usb" class="el-input__icon input-icon" />
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="pinCode">
+            <el-input v-model="pinCode" type="password" auto-complete="off" placeholder="请输入PIN码" >
+              <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button :loading="check_ukey_loading" size="medium" type="success" @click="checkUsbKeyExist" >
+              <span v-if="!check_ukey_loading">插入U-KEY</span>
+              <span v-else>查找中...</span>
+            </el-button>
+            <el-button :loading="loading" size="medium" type="primary" style="width:40%;" @click.native.prevent="handleUkeyLogin">
+              <span v-if="!loading">登 录</span>
+              <span v-else>登 录 中...</span>
+            </el-button>
+          </el-form-item>
+        </el-tab-pane>
+      </el-tabs>
     </el-form>
     <!--  底部  -->
     <div v-if="$store.state.settings.showFooter" id="el-login-footer">
@@ -44,10 +70,12 @@
 <script>
 import { encrypt } from '@/utils/rsaEncrypt'
 import Config from '@/settings'
-import { getCodeImg } from '@/api/login'
+import { getCodeImg,generatePreSignCode } from '@/api/login'
 import Cookies from 'js-cookie'
 import qs from 'qs'
 import Background from '@/assets/images/background.webp'
+import mToken from '@/utils/mToken'
+import {_Base64encode,_Base64decode} from '@/utils/base64'
 export default {
   name: 'Login',
   data() {
@@ -55,20 +83,27 @@ export default {
       Background: Background,
       codeUrl: '',
       cookiePass: '',
+      pinCode : null,
       loginForm: {
-        username: 'admin',
-        password: '123456',
+        username: '',
+        password: '',
         rememberMe: false,
         code: '',
-        uuid: ''
+        uuid: '',
+        deviceNo : null,
+        sign : null,
+        authMethod : 2,
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', message: '用户名不能为空' }],
-        password: [{ required: true, trigger: 'blur', message: '密码不能为空' }],
-        code: [{ required: true, trigger: 'change', message: '验证码不能为空' }]
+        // username: [{ required: true, trigger: 'blur', message: '用户名不能为空' }],
+        // password: [{ required: true, trigger: 'blur', message: '密码不能为空' }],
+        // code: [{ required: true, trigger: 'change', message: '验证码不能为空' }],
       },
       loading: false,
-      redirect: undefined
+      check_ukey_loading : false,
+      redirect: undefined,
+      mToken : null,
+      preSignCode : null,
     }
   },
   watch: {
@@ -93,12 +128,19 @@ export default {
     this.getCookie()
     // token 过期提示
     this.point()
+    this.mToken = new mToken("mTokenPlugin")
   },
   methods: {
     getCode() {
       getCodeImg().then(res => {
         this.codeUrl = res.img
         this.loginForm.uuid = res.uuid
+      })
+    },
+    getPreSignCode() {
+      const parentThis = this;
+      generatePreSignCode().then(res => {
+          parentThis.preSignCode = res.code
       })
     },
     getCookie() {
@@ -115,14 +157,30 @@ export default {
         code: ''
       }
     },
+    handleTabClick(obj) {
+      console.log(obj.index)
+      if(obj.index == 0){
+        //用户密码登陆
+        this.loginForm.authMethod = 2
+        this.getCode()
+      }else {
+        this.loginForm.authMethod = 1
+        this.getPreSignCode()
+      }
+    },
     handleLogin() {
+      const parentThis = this
       this.$refs.loginForm.validate(valid => {
         const user = {
-          username: this.loginForm.username,
-          password: this.loginForm.password,
-          rememberMe: this.loginForm.rememberMe,
-          code: this.loginForm.code,
-          uuid: this.loginForm.uuid
+          username: parentThis.loginForm.username,
+          password: parentThis.loginForm.password,
+          rememberMe: parentThis.loginForm.rememberMe,
+          code: parentThis.loginForm.code,
+          uuid: parentThis.loginForm.uuid,
+          sign : parentThis.loginForm.sign,
+          preSignCode : parentThis.preSignCode,
+          authMethod : parentThis.loginForm.authMethod,
+          dn : parentThis.loginForm.deviceNo,
         }
         if (user.password !== this.cookiePass) {
           user.password = encrypt(user.password)
@@ -151,6 +209,86 @@ export default {
         }
       })
     },
+    handleUkeyLogin(){
+      this.loginForm.authMethod = 1
+      const token = this.mToken
+      const ret = token.SOF_Login(this.pinCode);
+      if(!this.loginForm.deviceNo){
+        this.$notify({
+            title: '警告',
+            message: '未查找到UKEY！ 请插入UKEY后点击<<插入U-KEY>>按钮',
+            type: 'warning',
+            duration: 2000
+          })
+          return;
+      }
+      if (ret != 0) {
+        var retryCount = token.SOF_GetPinRetryCount();
+        this.$notify({
+            title: '警告',
+            message: 'PIN码错误，剩余重试次数'+retryCount,
+            type: 'warning',
+            duration: 2000
+          })
+          return;
+      }
+      this.signData()
+      this.handleLogin()
+    },
+    checkUsbKeyExist() {
+      const token = this.mToken;
+      //设备型号  GM3000
+      var ret = token.SOF_LoadLibrary(token.GM3000);
+      if (ret != 0) {
+          this.$notify({
+          title: '错误',
+          message: "加载控件失败,错误码:" + token.SOF_GetLastError(),
+          type: 'error',
+          duration: 5000
+        })
+          return;
+      }
+      var deviceName = token.SOF_EnumDevice()
+      if (!deviceName) {
+        this.$notify({
+          title: '错误',
+          message: '未找到任何UKEY',
+          type: 'error',
+          duration: 5000
+        })
+        return;
+      }
+      deviceName = deviceName[0]
+      var ret = token.SOF_GetDeviceInstance(deviceName, "")
+      if (ret != 0) {
+          console.log("绑定应用失败，确定是否初始化Key,错误码:" + token.SOF_GetLastError());
+          return;
+      }
+      this.loginForm.deviceNo = deviceName
+    },
+    signData() {    
+      const token = this.mToken;
+      //签名证书 cerType = 1
+      var cerType = 1
+      //加密算法SHA1
+      var DigestMethod = 2
+      var inData = this.preSignCode;
+      token.SOF_SetDigestMethod(Number(DigestMethod));
+      //容器名称 
+      var containerName = 'RSA'
+      var signed = token.SOF_SignData(containerName, cerType, _Base64encode(inData), inData.length, 0);
+      if (signed != null && signed != ""){
+        console.log(signed)
+      }else{
+        this.$notify({
+          title: '错误',
+          message: "签名失败,错误码:" + token.SOF_GetLastError(),
+          type: 'error',
+          duration: 5000
+        })
+      }
+      this.loginForm.sign = signed
+    },
     point() {
       const point = Cookies.get('point') !== undefined
       if (point) {
@@ -162,7 +300,7 @@ export default {
         })
         Cookies.remove('point')
       }
-    }
+    },
   }
 }
 </script>

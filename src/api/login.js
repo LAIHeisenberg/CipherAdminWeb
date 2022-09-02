@@ -1,15 +1,10 @@
 import request from '@/utils/request'
 
-export function login(username, password, code, uuid) {
+export function login(userInfo) {
   return request({
     url: 'auth/login',
     method: 'post',
-    data: {
-      username,
-      password,
-      code,
-      uuid
-    }
+    data: userInfo
   })
 }
 
@@ -31,5 +26,12 @@ export function logout() {
   return request({
     url: 'auth/logout',
     method: 'delete'
+  })
+}
+
+export function generatePreSignCode() {
+  return request({
+    url : 'auth/preSign-code',
+    method : 'get'
   })
 }

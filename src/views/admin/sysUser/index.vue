@@ -47,26 +47,16 @@
             <el-form-item label="真实姓名" prop="realName" >
               <el-input v-model="form.realName" @keydown.native="keydown($event)" />
             </el-form-item>
-            <el-form-item label="用户类型" prop="userType">
-              <el-select
-                v-model="roleDatas"
-                style="width: 208px"
-                placeholder="请选择"
-                @change="changeRole"
-              >
-                <el-option
-                  v-for="item in roles"
-                  :key="item.name"
-                  :label="item.name"
-                  :value="item.id"
-                />
-              </el-select>
-            </el-form-item>
             <el-form-item label="认证方式" prop="authMethod">
               <el-radio-group v-model="form.authMethod">
-                <el-radio label="1">用户口令</el-radio>
-                <el-radio label="2">USBKEY</el-radio>
+                <el-radio label="2">用户口令</el-radio>
+                <el-radio label="1">USBKEY</el-radio>
               </el-radio-group>
+            </el-form-item>
+            <el-form-item label="设备号" v-if="form.authMethod == 1" >
+              <el-input v-model="form.dn" :disabled="true" style="width: 69%;" />
+              <el-button size="small" type="primary"  @click="handleUKey">{{ukeyBtnDesc}}</el-button>
+              <el-input type="hidden" v-model="form.cert" ></el-input>
             </el-form-item>
             <el-form-item label="邮箱" prop="email">
               <el-input v-model="form.email" />
@@ -92,7 +82,22 @@
                 >{{ item.label }}</el-radio>
               </el-radio-group>
             </el-form-item>
-            <el-form-item lable="分配权限" style="width: 300px">
+            <el-form-item style="margin-bottom: 0;" label="角色" prop="roles">
+              <el-select
+                v-model="roleDatas"
+                style="width: 437px"
+                placeholder="请选择"
+                @change="changeRole"
+              >
+                <el-option
+                  v-for="item in roles"
+                  :key="item.name"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+            <!-- <el-form-item lable="分配权限" style="width: 300px">
               <el-card class="box-card" shadow="never">
                 <div slot="header" class="clearfix">
                   <el-tree
@@ -110,7 +115,7 @@
                   />
                 </div>
               </el-card>
-            </el-form-item>
+            </el-form-item> -->
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button type="text" @click="crud.cancelCU">取消</el-button>
@@ -124,7 +129,7 @@
           <el-table-column :show-overflow-tooltip="true" prop="realName" label="真实姓名" />
           <el-table-column :show-overflow-tooltip="true" prop="nickName" label="昵称" />
           <el-table-column prop="gender" label="性别" :formatter="function(row, column, cellValue, index){return cellValue == 1 ? '男' : '女'}" />
-          <el-table-column prop="authMethod" label="认证方式" :formatter="function(row, column, cellValue, index){return cellValue == 1 ? '用户口令' : 'USBKEY'}" />
+          <el-table-column prop="authMethod" label="认证方式" :formatter="function(row, column, cellValue, index){return cellValue == 2 ? '用户口令' : 'USBKEY'}" />
           <el-table-column prop="role.name" label="用户类型"></el-table-column>
           <el-table-column :show-overflow-tooltip="true" prop="tel" width="100" label="电话" />
           <el-table-column :show-overflow-tooltip="true" width="135" prop="email" label="邮箱" />
@@ -177,10 +182,11 @@ import Treeselect from '@riophae/vue-treeselect'
 import { mapGetters } from 'vuex'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 import { getMenusTree, getChild } from '@/api/system/menu'
+import mToken from '@/utils/mToken'
 let userRoles = {}
-const defaultForm = { id: null, username: null, nickName: null, gender: '男', email: null, enabled: 'false', roles: [],  phone: null }
+const defaultForm = { id: null, username: null, nickName: null, gender: null, email: null, enabled: 'false', roles: [],  phone: null, dn : null, cert : null, authMethod : null}
 export default {
-  name: 'User',
+  name: 'sysUser',
   components: { Treeselect, crudOperation, rrOperation, udOperation, pagination },
   cruds() {
     return CRUD({ title: '用户', url: 'api/users', crudMethod: { ...crudUser }, optShow: {
@@ -205,6 +211,10 @@ export default {
     }
     return {
       height: document.documentElement.clientHeight - 180 + 'px;',
+      mToken : null,
+      ukeyBtnDesc : '检测UKEY',
+      isDeviceExist : false,
+      cert : null,
       roles: [],menuIds: [],menus: [], 
       roleDatas: null,
       defaultProps: { children: 'children', label: 'label', isLeaf: 'leaf' },
@@ -226,7 +236,7 @@ export default {
           { required: true, message: '请输入真实姓名', trigger: 'blur' },
           { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
         ],
-        authType : [
+        authMethod : [
           { required: true, message: '请输入真实姓名', trigger: 'blur' },
         ],
         userType: [
@@ -255,6 +265,7 @@ export default {
     window.onresize = function temp() {
       that.height = document.documentElement.clientHeight - 180 + 'px;'
     }
+    this.mToken = new mToken()
   },
   methods: {
     // 禁止输入空格
@@ -276,6 +287,9 @@ export default {
     // 新增前将多选的值设置为空
     [CRUD.HOOK.beforeToAdd]() {
       this.roleDatas = null
+      this.form.dn = null
+      this.form.cert = null
+      this.isDeviceExist = false
     },
     // 初始化编辑时候的角色与岗位
     [CRUD.HOOK.beforeToEdit](crud, form) {
@@ -291,6 +305,29 @@ export default {
         return false
       }
       crud.form.role = userRoles
+
+      console.log(crud.form, 'form..')
+      if(crud.form.authMethod == 1){
+        if(!crud.form.dn){
+          this.$notify({
+            title: '错误',
+            message: '未检测到UKEY',
+            type: 'error',
+            duration: 5000
+          })
+          return false;
+        }
+        if(!crud.form.cert){
+          this.$notify({
+            title: '错误',
+            message: '证书未导出',
+            type: 'error',
+            duration: 5000
+          })
+          return false;
+        }
+      }
+
       return true
     },
     // 改变状态
@@ -349,6 +386,76 @@ export default {
         }
         this.$refs.menu.setCheckedKeys(this.menuIds)
       })
+    },
+    handleUKey(){
+      if(!this.isDeviceExist){
+        //设备存在
+        if(this.checkUkeyExist()){
+          this.ukeyBtnDesc = '导出证书'
+        }
+      }else {
+        this.exportCert()
+      }
+    },
+    checkUkeyExist(){
+      const token = this.mToken;
+      //设备型号  GM3000
+      var ret = token.SOF_LoadLibrary(token.GM3000);
+      if (ret != 0) {
+          this.$notify({
+          title: '错误',
+          message: "加载控件失败,错误码:" + token.SOF_GetLastError(),
+          type: 'error',
+          duration: 5000
+        })
+          return false;
+      }
+      var deviceName = token.SOF_EnumDevice()
+      if (deviceName == null) {
+          if (ret != 0) {
+              this.$notify({
+                title: '错误',
+                message: '未找到任何UKEY',
+                type: 'error',
+                duration: 5000
+              })
+          }
+          return false;
+      }
+      deviceName = deviceName[0]
+      var ret = token.SOF_GetDeviceInstance(deviceName, "")
+      if (ret != 0) {
+          console.log("绑定应用失败，确定是否初始化Key,错误码:" + token.SOF_GetLastError());
+          return false;
+      }
+      this.form.dn = deviceName
+      this.isDeviceExist = true
+      return true;
+    },
+    exportCert(){
+      const token = this.mToken;
+      //容器名称
+      const containerName = 'RSA'
+      //证书类型
+      const cerType = 1
+      const cert = token.SOF_ExportUserCert(containerName, cerType);
+      if(cert){
+        this.$notify({
+              title: '',
+              message: '证书导出成功！',
+              type: 'success',
+              duration: 5000
+            })
+      }else{
+        this.$notify({
+              title: '',
+              message: '证书导出失败',
+              type: 'warn',
+              duration: 5000
+            })
+      }
+      this.form.cert = cert;
+      console.log(cert,'导出证书')
     }
   }
 }

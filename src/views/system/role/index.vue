@@ -33,14 +33,13 @@
             <span class="role-span">角色列表</span>
           </div>
           <el-table ref="table" v-loading="crud.loading" highlight-current-row style="width: 100%;" :data="crud.data" @selection-change="crud.selectionChangeHandler" @current-change="handleCurrentChange">
-            <el-table-column prop="id" v-permission="['admin','roles:edit']" type="selection" width="55" />
+            <el-table-column prop="id" label="ID"  width="55" />
             <el-table-column prop="name" label="名称" />
             <el-table-column :show-overflow-tooltip="true" prop="description" label="描述" />
             <el-table-column :show-overflow-tooltip="true" width="135px" prop="createTime" label="创建日期" />
             <el-table-column v-if="checkPer(['admin','roles:edit','roles:del'])" label="操作" width="130px" align="center" fixed="right">
               <template slot-scope="scope">
                 <udOperation
-                  v-if="scope.row.level >= level"
                   :data="scope.row"
                   :permission="permission"
                 />
@@ -160,6 +159,7 @@ export default {
     },
     // 触发单选
     handleCurrentChange(val) {
+      console.log(val,'handleCurrentChange')
       if (val) {
         const _this = this
         // 清空菜单的选中
