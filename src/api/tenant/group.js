@@ -24,4 +24,16 @@ export function edit(data) {
   })
 }
 
+export function getAllGroup() {
+  const params = {
+    page: 0,
+    size: 9999
+  }
+  return request({
+    url: 'api/bsGroup',
+    method: 'get',
+    params
+  })
+}
+
 export default { add, edit, del }

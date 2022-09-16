@@ -24,4 +24,12 @@ export function edit(data) {
   })
 }
 
+// 获取所有的Role
+export function getAll() {
+  return request({
+    url: 'api/roles/all',
+    method: 'get'
+  })
+}
+
 export default { add, edit, del }
