@@ -3,27 +3,13 @@
     <!--工具栏-->
     <div class="head-container">
       <!--如果想在工具栏加入更多按钮，可以使用插槽方式， slot = 'left' or 'right'-->
-      <crudOperation :permission="permission" />
+      <crudOperation :permission="permission"/>
       <!--表单组件-->
-      <el-dialog :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0" :title="crud.status.title" width="500px">
+      <el-dialog :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0"
+                 :title="crud.status.title" width="500px">
         <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
-          <el-form-item label="组ID">
-            <el-input v-model="form.id" style="width: 370px;" />
-          </el-form-item>
           <el-form-item label="组名称">
-            <el-input v-model="form.name" style="width: 370px;" />
-          </el-form-item>
-          <el-form-item label="创建人">
-            <el-input v-model="form.createBy" style="width: 370px;" />
-          </el-form-item>
-          <el-form-item label="创建时间">
-            <el-input v-model="form.createTime" style="width: 370px;" />
-          </el-form-item>
-          <el-form-item label="修改人">
-            <el-input v-model="form.updateBy" style="width: 370px;" />
-          </el-form-item>
-          <el-form-item label="修改时间">
-            <el-input v-model="form.updateTime" style="width: 370px;" />
+            <el-input v-model="form.name" style="width: 370px;"/>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -32,15 +18,17 @@
         </div>
       </el-dialog>
       <!--表格渲染-->
-      <el-table ref="table" v-loading="crud.loading" :data="crud.data" size="small" style="width: 100%;" @selection-change="crud.selectionChangeHandler">
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="id" label="组ID" />
-        <el-table-column prop="name" label="组名称" />
-        <el-table-column prop="createBy" label="创建人" />
-        <el-table-column prop="createTime" label="创建时间" />
-        <el-table-column prop="updateBy" label="修改人" />
-        <el-table-column prop="updateTime" label="修改时间" />
-        <el-table-column v-if="checkPer(['admin','bsGroup:edit','bsGroup:del'])" label="操作" width="150px" align="center">
+      <el-table ref="table" v-loading="crud.loading" :data="crud.data" size="small" style="width: 100%;"
+                @selection-change="crud.selectionChangeHandler">
+        <el-table-column type="selection" width="55"/>
+        <el-table-column prop="id" label="组ID"/>
+        <el-table-column prop="name" label="组名称"/>
+        <el-table-column prop="createBy" label="创建人"/>
+        <el-table-column prop="createTime" label="创建时间"/>
+        <el-table-column prop="updateBy" label="修改人"/>
+        <el-table-column prop="updateTime" label="修改时间"/>
+        <el-table-column v-if="checkPer(['admin','bsGroup:edit','bsGroup:del'])" label="操作" width="150px"
+                         align="center">
           <template slot-scope="scope">
             <udOperation
               :data="scope.row"
@@ -50,7 +38,7 @@
         </el-table-column>
       </el-table>
       <!--分页组件-->
-      <pagination />
+      <pagination/>
     </div>
   </div>
 </template>
@@ -69,17 +57,23 @@ export default {
   components: { pagination, crudOperation, rrOperation, udOperation },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   cruds() {
-    return CRUD({ title: 'bsuserGroup', url: 'api/bsGroup', idField: 'id', sort: 'id,desc', crudMethod: { ...crudBsGroup }})
+    return CRUD({
+      title: '用户组',
+      url: 'api/bsGroup',
+      idField: 'id',
+      sort: 'id,desc',
+      crudMethod: { ...crudBsGroup }
+    })
   },
   data() {
     return {
       permission: {
-        add: ['admin', 'bsGroup:add'],
-        edit: ['admin', 'bsGroup:edit'],
-        del: ['admin', 'bsGroup:del']
+        add: ['admin', 'bsGroup:manage'],
+        edit: ['admin', 'bsGroup:manage'],
+        del: ['admin', 'bsGroup:manage']
       },
-      rules: {
-      }    }
+      rules: {}
+    }
   },
   methods: {
     // 钩子：在获取表格数据之前执行，false 则代表不获取数据
