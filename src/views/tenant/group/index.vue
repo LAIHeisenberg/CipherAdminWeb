@@ -27,7 +27,7 @@
         <el-table-column prop="createTime" label="创建时间"/>
         <el-table-column prop="updateBy" label="修改人"/>
         <el-table-column prop="updateTime" label="修改时间"/>
-        <el-table-column v-if="checkPer(['admin','bsGroup:edit','bsGroup:del'])" label="操作" width="150px"
+        <el-table-column v-if="checkPer(['bsGroup:manage'])" label="操作" width="150px"
                          align="center">
           <template slot-scope="scope">
             <udOperation
@@ -68,9 +68,9 @@ export default {
   data() {
     return {
       permission: {
-        add: ['admin', 'bsGroup:manage'],
-        edit: ['admin', 'bsGroup:manage'],
-        del: ['admin', 'bsGroup:manage']
+        add: ['bsGroup:manage'],
+        edit: ['bsGroup:manage'],
+        del: ['bsGroup:manage']
       },
       rules: {}
     }
