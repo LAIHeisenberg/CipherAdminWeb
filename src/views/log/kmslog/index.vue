@@ -50,17 +50,14 @@
 </template>
 
 <script>
-// import Search from './search'
-// import { delAllInfo } from '@/api/monitor/log'
 import CRUD, { presenter } from '@crud/crud'
-import crudOperation from '@crud/CRUD.operation'
 import pagination from '@crud/Pagination'
 
 export default {
-  name: 'Log',
-  components: {  crudOperation, pagination },
+  name: 'klmsLog',
+  components: { pagination },
   cruds() {
-    return CRUD({ title: '日志', url: 'api/logs' })
+    return CRUD({ title: '日志', url: '/api/logs', query: { 'source': 1 }})
   },
   mixins: [presenter()],
   created() {
@@ -71,27 +68,7 @@ export default {
       download: true
     }
   },
-  methods: {
-    // confirmDelAll() {
-    //   this.$confirm(`确认清空所有操作日志吗?`, '提示', {
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     type: 'warning'
-    //   }).then(() => {
-    //     this.crud.delAllLoading = true
-    //     delAllInfo().then(res => {
-    //       this.crud.delAllLoading = false
-    //       this.crud.dleChangePage(1)
-    //       this.crud.delSuccessNotify()
-    //       this.crud.toQuery()
-    //     }).catch(err => {
-    //       this.crud.delAllLoading = false
-    //       console.log(err.response.data.message)
-    //     })
-    //   }).catch(() => {
-    //   })
-    // }
-  }
+  methods: {}
 }
 </script>
 

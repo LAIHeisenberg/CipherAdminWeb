@@ -3,8 +3,8 @@
     <div class="head-container">
     </div>
     <el-form ref="form" :model="form" label-width="120px">
-        <el-form-item label="日志文件名称">
-          <el-input v-model="form.name"></el-input>
+        <el-form-item label="恢复文件路径">
+          <el-input v-model="form.path"></el-input>
         </el-form-item>
         <el-form-item label="类型">
           <el-select v-model="form.type" placeholder="请选择类型">
@@ -12,15 +12,12 @@
             <el-option label="KMIP服务日志" value="kmip-log"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="备份路径">
-          <el-input v-model="form.path"></el-input>
-        </el-form-item>
         <el-row>
           <el-col :span=22>
             &nbsp;
           </el-col>
           <el-col :span=2>
-            <el-button type="warning" round>执行备份</el-button>
+            <el-button type="warning" round>执行恢复</el-button>
           </el-col>
         </el-row>
     </el-form>
@@ -37,7 +34,6 @@ export default {
   data() {
     return {
       'form': {
-        'name'  : null,
         'type' : null,
         'path' : null,
       }
