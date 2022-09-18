@@ -27,7 +27,7 @@
 <script>
 
 export default {
-  name: 'Log',
+  name: 'LogRecover',
   components: { },
 
   // mixins: [presenter()],

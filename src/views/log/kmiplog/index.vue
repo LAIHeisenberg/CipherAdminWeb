@@ -54,7 +54,7 @@ import CRUD, { presenter } from '@crud/crud'
 import pagination from '@crud/Pagination'
 
 export default {
-  name: 'Log',
+  name: 'kmipLog',
   components: { pagination },
   cruds() {
     return CRUD({ title: '日志', url: '/api/logs', query: { 'source': 2 }})
