@@ -7,31 +7,28 @@
       <!--表单组件-->
       <el-dialog :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0" :title="crud.status.title" width="500px">
         <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
-          <el-form-item label="id">
-            <el-input v-model="form.id" style="width: 370px;" />
-          </el-form-item>
-          <el-form-item label="ca 名称">
+          <el-form-item label="ca名称">
             <el-input v-model="form.certificateName" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="ca 证书密钥长度">
+          <el-form-item label="ca证书密钥长度">
             <el-input v-model="form.keySize" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="ca 签发者">
+          <el-form-item label="ca签发者">
             <el-input v-model="form.certificateIssuer" style="width: 370px;" />
           </el-form-item>
           <el-form-item label="ca证书使用者">
             <el-input v-model="form.certificateSubject" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="ca 证书开始日期">
+          <el-form-item label="ca证书开始日期">
             <el-input v-model="form.startDate" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="ca 证书过期时间">
+          <el-form-item label="ca证书过期时间">
             <el-input v-model="form.expireDate" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="ca 证书状态(1:有效,2:过期,3:未知)">
+          <el-form-item label="ca证书状态">
             <el-input v-model="form.certificateStatus" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="ca 证书内容">
+          <el-form-item label="ca证书内容">
             <el-input v-model="form.certificateContent" style="width: 370px;" />
           </el-form-item>
         </el-form>
@@ -44,15 +41,15 @@
       <el-table ref="table" v-loading="crud.loading" :data="crud.data" size="small" style="width: 100%;" @selection-change="crud.selectionChangeHandler">
         <el-table-column type="selection" width="55" />
         <el-table-column prop="id" label="id" />
-        <el-table-column prop="certificateName" label="ca 名称" />
-        <el-table-column prop="keySize" label="ca 证书密钥长度" />
-        <el-table-column prop="certificateIssuer" label="ca 签发者" />
+        <el-table-column prop="certificateName" label="ca名称" />
+        <el-table-column prop="keySize" label="ca证书密钥长度" />
+        <el-table-column prop="certificateIssuer" label="ca签发者" />
         <el-table-column prop="certificateSubject" label="ca证书使用者" />
-        <el-table-column prop="startDate" label="ca 证书开始日期" />
-        <el-table-column prop="expireDate" label="ca 证书过期时间" />
-        <el-table-column prop="certificateStatus" label="ca 证书状态(1:有效,2:过期,3:未知)" />
-        <el-table-column prop="certificateContent" label="ca 证书内容" />
-        <el-table-column v-if="checkPer(['admin','bsKnownCa:edit','bsKnownCa:del'])" label="操作" width="150px" align="center">
+        <el-table-column prop="startDate" label="ca证书开始日期" />
+        <el-table-column prop="expireDate" label="ca证书过期时间" />
+        <el-table-column prop="certificateStatus" label="ca证书状态" />
+        <el-table-column prop="certificateContent" label="ca证书内容" />
+        <el-table-column v-if="checkPer(['known:manage'])" label="操作" width="150px" align="center">
           <template slot-scope="scope">
             <udOperation
               :data="scope.row"
@@ -68,7 +65,7 @@
 </template>
 
 <script>
-import crudBsKnownCa from '@/api/bsKnownCa'
+import crudBsKnownCa from '@/api/ca/knownCa'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
@@ -81,14 +78,14 @@ export default {
   components: { pagination, crudOperation, rrOperation, udOperation },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   cruds() {
-    return CRUD({ title: '/knownCa', url: 'api/localca', idField: 'id', sort: 'id,desc', crudMethod: { ...crudBsKnownCa }})
+    return CRUD({ title: '已知CA', url: 'api/bsKnownCa', idField: 'id', sort: 'id,desc', crudMethod: { ...crudBsKnownCa }})
   },
   data() {
     return {
       permission: {
-        add: ['admin', 'bsKnownCa:add'],
-        edit: ['admin', 'bsKnownCa:edit'],
-        del: ['admin', 'bsKnownCa:del']
+        add: ['known:manage'],
+        edit: ['known:manage'],
+        del: ['known:manage']
       },
       rules: {
       }    }

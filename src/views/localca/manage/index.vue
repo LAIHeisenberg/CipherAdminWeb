@@ -7,44 +7,32 @@
       <!--表单组件-->
       <el-dialog :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0" :title="crud.status.title" width="500px">
         <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
-          <el-form-item label="ca id">
-            <el-input v-model="form.caId" style="width: 370px;" />
-          </el-form-item>
-          <el-form-item label="证书名称">
+          <el-form-item label="ca名称">
             <el-input v-model="form.certificateName" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="证书密钥长度">
+          <el-form-item label="ca证书密钥长度">
             <el-input v-model="form.keySize" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="证书签发者">
+          <el-form-item label="ca签发者">
             <el-input v-model="form.certificateIssuer" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="证书使用者">
+          <el-form-item label="ca证书使用者">
             <el-input v-model="form.certificateSubject" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="证书开始时间">
+          <el-form-item label="ca证书开始日期">
             <el-input v-model="form.startDate" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="证书过期时间">
+          <el-form-item label="ca证书过期时间">
             <el-input v-model="form.expireDate" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="证书状态">
+          <el-form-item label="ca证书状态">
             <el-input v-model="form.certificateStatus" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="证书目的">
-            <el-input v-model="form.certificatePurpose" style="width: 370px;" />
-          </el-form-item>
-          <el-form-item label="证书内容">
+          <el-form-item label="ca证书内容">
             <el-input v-model="form.certificateContent" style="width: 370px;" />
           </el-form-item>
-          <el-form-item label="证书密钥">
+          <el-form-item label="ca证书密钥">
             <el-input v-model="form.privateKey" style="width: 370px;" />
-          </el-form-item>
-          <el-form-item label="keystore类型">
-            <el-input v-model="form.keystoreType" style="width: 370px;" />
-          </el-form-item>
-          <el-form-item label="keystore内容">
-            <el-input v-model="form.keystoreContent" style="width: 370px;" />
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -56,20 +44,16 @@
       <el-table ref="table" v-loading="crud.loading" :data="crud.data" size="small" style="width: 100%;" @selection-change="crud.selectionChangeHandler">
         <el-table-column type="selection" width="55" />
         <el-table-column prop="id" label="id" />
-        <el-table-column prop="caId" label="ca id" />
-        <el-table-column prop="certificateName" label="证书名称" />
-        <el-table-column prop="keySize" label="证书密钥长度" />
-        <el-table-column prop="certificateIssuer" label="证书签发者" />
-        <el-table-column prop="certificateSubject" label="证书使用者" />
-        <el-table-column prop="startDate" label="证书开始时间" />
-        <el-table-column prop="expireDate" label="证书过期时间" />
-        <el-table-column prop="certificateStatus" label="证书状态" />
-        <el-table-column prop="certificatePurpose" label="证书目的" />
-        <el-table-column prop="certificateContent" label="证书内容" />
-        <el-table-column prop="privateKey" label="证书密钥" />
-        <el-table-column prop="keystoreType" label="keystore类型" />
-        <el-table-column prop="keystoreContent" label="keystore内容" />
-        <el-table-column v-if="checkPer(['cert:manage'])" label="操作" width="150px" align="center">
+        <el-table-column prop="certificateName" label="ca名称" />
+        <el-table-column prop="keySize" label="ca证书密钥长度" />
+        <el-table-column prop="certificateIssuer" label="ca签发者" />
+        <el-table-column prop="certificateSubject" label="ca证书使用者" />
+        <el-table-column prop="startDate" label="ca证书开始日期" />
+        <el-table-column prop="expireDate" label="ca证书过期时间" />
+        <el-table-column prop="certificateStatus" label="ca证书状态" />
+        <el-table-column prop="certificateContent" label="ca证书内容" />
+        <el-table-column prop="privateKey" label="ca证书密钥" />
+        <el-table-column v-if="checkPer(['localCa:manage'])" label="操作" width="150px" align="center">
           <template slot-scope="scope">
             <udOperation
               :data="scope.row"
@@ -85,27 +69,27 @@
 </template>
 
 <script>
-import crudBsCertificate from '@/api/cert/certificate'
+import crudBsLocalCa from '@/api/ca/localca'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
 import udOperation from '@crud/UD.operation'
 import pagination from '@crud/Pagination'
 
-const defaultForm = { id: null, caId: null, certificateName: null, keySize: null, certificateIssuer: null, certificateSubject: null, startDate: null, expireDate: null, certificateStatus: null, certificatePurpose: null, certificateContent: null, privateKey: null, keystoreType: null, keystoreContent: null }
+const defaultForm = { id: null, certificateName: null, keySize: null, certificateIssuer: null, certificateSubject: null, startDate: null, expireDate: null, certificateStatus: null, certificateContent: null, privateKey: null }
 export default {
-  name: 'BsCertificate',
+  name: 'BsLocalCa',
   components: { pagination, crudOperation, rrOperation, udOperation },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   cruds() {
-    return CRUD({ title: '/certificate', url: 'api/bsCertificate', idField: 'id', sort: 'id,desc', crudMethod: { ...crudBsCertificate }})
+    return CRUD({ title: '本地CA', url: 'api/bsLocalCa', idField: 'id', sort: 'id,desc', crudMethod: { ...crudBsLocalCa }})
   },
   data() {
     return {
       permission: {
-        add: ['cert:manage'],
-        edit: ['cert:manage'],
-        del: ['cert:manage']
+        add: ['localCa:manage'],
+        edit: ['localCa:manage'],
+        del: ['localCa:manage']
       },
       rules: {
       }    }
