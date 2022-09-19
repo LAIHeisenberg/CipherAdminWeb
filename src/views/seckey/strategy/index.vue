@@ -6,25 +6,28 @@
     <el-dialog append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0" :title="crud.status.title" width="570px">
       <el-form ref="form" :inline="true" :model="form" size="small" label-width="120px">
         <el-form-item label="策略名称" prop="form.policyName">
-          <el-input v-model="form.secKeyName" />
+          <el-input v-model="form.policyName" />
         </el-form-item>
         <el-form-item label="特性" prop="form.propertys">
-          <el-input v-model="form.secKeyName" />
+          <el-input v-model="form.propertys" />
         </el-form-item>
         <el-form-item label="起始日期" prop="form.startDay">
-          <el-input v-model="form.secKeyName" />
+          <el-input v-model="form.startDay" />
         </el-form-item>
-        <el-form-item label="起始小时" prop="form.startMin">
-          <el-input v-model="form.secKeyName" />
+        <el-form-item label="起始小时" prop="form.startHour">
+          <el-input v-model="form.startHour" />
+        </el-form-item>
+        <el-form-item label="起始分钟" prop="form.startMin">
+          <el-input v-model="form.startMin" />
         </el-form-item>
         <el-form-item label="结束日期" prop="form.endDay">
-          <el-input v-model="form.secKeyName" />
+          <el-input v-model="form.endDay" />
         </el-form-item>
         <el-form-item label="结束小时" prop="form.endHour">
-          <el-input v-model="form.secKeyName" />
+          <el-input v-model="form.endHour" />
         </el-form-item>
         <el-form-item label="结束分钟" prop="form.endMin">
-          <el-input v-model="form.secKeyName" />
+          <el-input v-model="form.endMin" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -78,14 +81,14 @@ export default {
   name: 'seckeyStrategy',
   components: { pagination, crudOperation },
   cruds() {
-    return CRUD({ url: 'http://127.0.0.1:3000/mock/11/api/bsStrategy', crudMethod: { ...crudSecKeyStrategy }, title: '策略' })
+    return CRUD({ url: '/api/strategy', crudMethod: { ...crudSecKeyStrategy }, title: '策略' })
   },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
     return {
       permission: {
-        add: ['admin', 'seckey:manage'],
-        del: ['admin', 'seckey:manage']
+        add: ['admin', 'strategy:manage'],
+        del: ['admin', 'strategy:manage']
       }
     }
   },

@@ -131,7 +131,7 @@ export default {
   name: 'secKeyTemplate',
   components: { pagination, crudOperation },
   cruds() {
-    return CRUD({ url: 'http://127.0.0.1:3000/mock/11/api/template', crudMethod: { ...crudSecKeyTemplate }, title: '模板' })
+    return CRUD({ url: '/api/template', crudMethod: { ...crudSecKeyTemplate }, title: '模板' })
   },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
