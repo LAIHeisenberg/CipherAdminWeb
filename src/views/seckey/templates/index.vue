@@ -100,19 +100,11 @@
       <el-table-column prop="recommendedCurve" label="推荐曲线" />
       <el-table-column label="操作" width="70px" fixed="right">
         <template slot-scope="scope">
-          <el-popover
-            :ref="scope.$index"
-            v-permission="['admin','seckey:manage']"
-            placement="top"
-            width="180"
-          >
-            <p>确定要删除该模板吗?</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button :loading="delLoading" type="primary" size="mini" @click="delMethod(scope.row.key, scope.$index)">确定</el-button>
-            </div>
-            <el-button slot="reference" size="mini" type="text">删除</el-button>
-          </el-popover>
+          <udOperation
+            :data="scope.row"
+            :permission="permission"
+            msg="确定要删除该模板吗?"
+          />
         </template>
       </el-table-column>
     </el-table>
@@ -124,12 +116,13 @@
 <script>
 import crudSecKeyTemplate from '@/api/seckey/template'
 import CRUD, { presenter, header, crud, form } from '@crud/crud'
+import udOperation from '@crud/UD.operation'
 import crudOperation from '@crud/CRUD.operation'
 import pagination from '@crud/Pagination'
 const defaultForm = {cryptographicAlgorithm:null,cryptographicLength:null,cryptographicUsageMask:null,deactivationDate:null,operationPolicyName:null,processStartDate:null,protectStopDate:null,qlength:null,recommendedCurve:null}
 export default {
   name: 'secKeyTemplate',
-  components: { pagination, crudOperation },
+  components: { pagination, crudOperation,udOperation },
   cruds() {
     return CRUD({ url: '/api/template', crudMethod: { ...crudSecKeyTemplate }, title: '模板' })
   },
@@ -204,6 +197,7 @@ export default {
       }],
       permission: {
         add: ['admin', 'seckey:manage'],
+        edit: ['admin', 'no-edit'],
         del: ['admin', 'seckey:manage']
       }
     }

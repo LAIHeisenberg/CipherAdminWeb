@@ -50,19 +50,11 @@
       <el-table-column :show-overflow-tooltip="true" prop="address" label="创建人" />
       <el-table-column label="操作" width="70px" fixed="right">
         <template slot-scope="scope">
-          <el-popover
-            :ref="scope.$index"
-            v-permission="['admin','seckey:manage']"
-            placement="top"
-            width="180"
-          >
-            <p>确定要删除该策略吗?</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button :loading="delLoading" type="primary" size="mini" @click="delMethod(scope.row.key, scope.$index)">确定</el-button>
-            </div>
-            <el-button slot="reference" size="mini" type="text">删除</el-button>
-          </el-popover>
+          <udOperation
+            :data="scope.row"
+            :permission="permission"
+            msg="确定要删除该策略吗?"
+          />
         </template>
       </el-table-column>
     </el-table>
@@ -75,21 +67,24 @@
 import crudSecKeyStrategy from '@/api/seckey/strategy'
 import CRUD, { presenter, header, crud, form } from '@crud/crud'
 import crudOperation from '@crud/CRUD.operation'
+import udOperation from '@crud/UD.operation'
 import pagination from '@crud/Pagination'
 const defaultForm = {policyName:null,propertys:null,startDay:null,startHour:null,startMin:null,endDay:null,endHour:null,endMin:null}
 export default {
   name: 'seckeyStrategy',
-  components: { pagination, crudOperation },
+  components: { pagination, crudOperation, udOperation },
   cruds() {
     return CRUD({ url: '/api/strategy', crudMethod: { ...crudSecKeyStrategy }, title: '策略' })
   },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
     return {
+
       permission: {
-        add: ['admin', 'strategy:manage'],
-        del: ['admin', 'strategy:manage']
-      }
+        add: ['strategy:manage'],
+        edit: ['strategy:no-edit'],
+        del: ['strategy:manage']
+      },
     }
   },
   created() {

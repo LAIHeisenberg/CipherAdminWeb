@@ -147,8 +147,8 @@
       </div>
     </el-dialog>
     <!--表格渲染-->
-    <el-table ref="table" v-loading="crud.loading" :data="mockTableData" style="width: 100%;" @selection-change="crud.selectionChangeHandler">
-      <el-table-column type="selection" width="55" />
+    <el-table ref="table" v-loading="crud.loading" :data="crud.data" style="width: 100%;" @selection-change="crud.selectionChangeHandler">
+      <el-table-column type="index" width="55" />
       <el-table-column prop="uuidkey" label="uuidkey" />
       <el-table-column prop="seckeyName" label="密钥名称" />
       <el-table-column prop="nickName" label="密钥类型" />
@@ -174,42 +174,42 @@
           <el-row>
             <el-col :span="8">
               <el-popover
-                :ref="scope.$index"
+                :ref="scope.$index+'active'"
                 placement="top"
                 width="180"
               >
                 <p>确定激活该密钥？</p>
                 <div style="text-align: right; margin: 0">
-                  <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-                  <el-button type="primary" size="mini" @click="doActivate">确定</el-button>
+                  <el-button size="mini" type="text" @click="$refs[scope.$index+'active'].doClose()">取消</el-button>
+                  <el-button type="primary" size="mini" @click="doActivate(scope.row.uuidkey)">确定</el-button>
                 </div>
                 <el-button slot="reference" size="mini" type="text">激活</el-button>
               </el-popover>
             </el-col>
             <el-col :span="8">
-              <el-popover
-            :ref="scope.$index"
+          <el-popover
+            :ref="scope.$index+'link'"
             placement="top"
             width="180"
           >
             <p>确定链接该密钥？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button type="primary" size="mini" @click="doLink">确定</el-button>
+              <el-button size="mini" type="text" @click="$refs[scope.$index+'link'].doClose()">取消</el-button>
+              <el-button type="primary" size="mini" @click="doLink(scope.row.uuidkey)">确定</el-button>
             </div>
             <el-button slot="reference" size="mini" type="text">链接</el-button>
           </el-popover>
             </el-col>
             <el-col :span="8">
               <el-popover
-            :ref="scope.$index"
+            :ref="scope.$index+'update'"
             placement="top"
             width="180"
           >
             <p>确定更新该密钥</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button type="primary" size="mini" @click="doUpdate">确定</el-button>
+              <el-button size="mini" type="text" @click="$refs[scope.$index+'update'].doClose()">取消</el-button>
+              <el-button type="primary" size="mini" @click="doUpdate(scope.row.uuidkey)">确定</el-button>
             </div>
             <el-button slot="reference" size="mini" type="text">更新</el-button>
           </el-popover>
@@ -218,42 +218,42 @@
           <el-row>
             <el-col :span="8">
               <el-popover
-            :ref="scope.$index"
+            :ref="scope.$index+'cancel'"
             placement="top"
             width="180"
           >
             <p>确定注销该密钥？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button type="primary" size="mini" @click="doCancel">确定</el-button>
+              <el-button size="mini" type="text" @click="$refs[scope.$index+'cancel'].doClose()">取消</el-button>
+              <el-button type="primary" size="mini" @click="doCancel(scope.row.uuidkey)">确定</el-button>
             </div>
             <el-button slot="reference" size="mini" type="text">注销</el-button>
           </el-popover>
             </el-col>
             <el-col :span="8">
               <el-popover
-            :ref="scope.$index"
+            :ref="scope.$index+'destroy'"
             placement="top"
             width="180"
           >
             <p>确定销毁该密钥？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button type="primary" size="mini" @click="doDestroy">确定</el-button>
+              <el-button size="mini" type="text" @click="$refs[scope.$index+'destroy'].doClose()">取消</el-button>
+              <el-button type="primary" size="mini" @click="doDestroy(scope.row.uuidkey)">确定</el-button>
             </div>
             <el-button slot="reference" size="mini" type="text">销毁</el-button>
           </el-popover>
             </el-col>
             <el-col :span="8">
               <el-popover
-            :ref="scope.$index"
+            :ref="scope.$index+'delete'"
             placement="top"
             width="180"
           >
             <p>确定删除该密钥？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button type="primary" size="mini" @click="doDelete">确定</el-button>
+              <el-button size="mini" type="text" @click="$refs[scope.$index+'delete'].doClose()">取消</el-button>
+              <el-button type="primary" size="mini" @click="doDelete(scope.row.uuidkey)">确定</el-button>
             </div>
             <el-button slot="reference" size="mini" type="text">删除</el-button>
           </el-popover>
@@ -262,47 +262,47 @@
           <el-row>
             <el-col :span="8">
               <el-popover
-            :ref="scope.$index"
+            :ref="scope.$index+'archive'"
             placement="top"
             width="180"
           >
             <p>确定归档该密钥？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button type="primary" size="mini" @click="doArchive">确定</el-button>
+              <el-button size="mini" type="text" @click="$refs[scope.$index+'archive'].doClose()">取消</el-button>
+              <el-button type="primary" size="mini" @click="doArchive(scope.row.uuidkey)">确定</el-button>
             </div>
             <el-button slot="reference" size="mini" type="text">归档</el-button>
           </el-popover>
             </el-col>
             <el-col :span="8">
               <el-popover
-            :ref="scope.$index"
+            :ref="scope.$index+'backup'"
             placement="top"
             width="180"
           >
             <p>确定备份该密钥？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button type="primary" size="mini" @click="doBackup">确定</el-button>
+              <el-button size="mini" type="text" @click="$refs[scope.$index+'backup'].doClose()">取消</el-button>
+              <el-button type="primary" size="mini" @click="doBackup(scope.row.uuidkey)">确定</el-button>
             </div>
             <el-button slot="reference" size="mini" type="text">备份</el-button>
           </el-popover>
             </el-col>
             <el-col :span="8">
               <el-popover
-            :ref="scope.$index"
+            :ref="scope.$index+'recover'"
             placement="top"
             width="180"
           >
             <p>确定恢复该密钥？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button type="primary" size="mini" @click="doRecover">确定</el-button>
+              <el-button size="mini" type="text" @click="$refs[scope.$index+'recover'].doClose()">取消</el-button>
+              <el-button type="primary" size="mini" @click="doRecover(scope.row.uuidkey)">确定</el-button>
             </div>
             <el-button slot="reference" size="mini" type="text">恢复</el-button>
           </el-popover>
             </el-col>
-          </el-row>
+          </el-row> 
         </template>
       </el-table-column>
     </el-table>
@@ -321,7 +321,7 @@ export default {
   name: 'SeckeyManage',
   components: { pagination, crudOperation },
   cruds() {
-    return CRUD({ url: 'api/seckey/list', crudMethod: { ...crudSecKeyOperate }, title: '密钥' })
+    return CRUD({ url: 'http://localhost:3000/mock/11/api/seckey/list', crudMethod: { ...crudSecKeyOperate }, title: '密钥' })
   },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
@@ -493,31 +493,31 @@ export default {
       console.log('change strategy')
       console.log(row)
     },
-    doActivate(){
-      console.log('激活密钥..')
+    doActivate(uuidKey){
+      console.log('激活密钥..'+uuidKey)
     },
-    doLink(){
+    doLink(uuidKey){
       console.log('链接密钥..')
     },
-    doUpdate(){
+    doUpdate(uuidKey){
       console.log('更新密钥..')
     },
-    doCancel(){
+    doCancel(uuidKey){
       console.log('注销密钥')
     },
-    doDelete(){
+    doDelete(uuidKey){
       console.log('删除密钥')
     },
-    doDestroy(){
+    doDestroy(uuidKey){
       console.log('销毁密钥')
     },
-    doArchive(){
+    doArchive(uuidKey){
       console.log('归档密钥')
     },
-    doBackup(){
+    doBackup(uuidKey){
       console.log('备份密钥')
     },
-    doRecover(){
+    doRecover(uuidKey){
       console.log('恢复密钥')
     },
     handleImportKey(){
