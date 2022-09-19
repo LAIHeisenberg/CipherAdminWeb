@@ -85,7 +85,7 @@
 </template>
 
 <script>
-import crudBsCertificate from '@/api/cert/certificate'
+import crudBsCertificate from '@/api/cert/bsCert'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'
@@ -98,17 +98,21 @@ export default {
   components: { pagination, crudOperation, rrOperation, udOperation },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   cruds() {
-    return CRUD({ title: '/certificate', url: 'api/bsCertificate', idField: 'id', sort: 'id,desc', crudMethod: { ...crudBsCertificate }})
+    return CRUD({ title: '证书', url: 'api/bsCertificate', idField: 'id', sort: 'id,desc', crudMethod: { ...crudBsCertificate }})
+  },
+  created() {
+    this.crud.optShow = {
+      add: true
+    }
   },
   data() {
     return {
       permission: {
         add: ['cert:manage'],
-        edit: ['cert:manage'],
-        del: ['cert:manage']
       },
       rules: {
-      }    }
+      }    
+    }
   },
   methods: {
     // 钩子：在获取表格数据之前执行，false 则代表不获取数据

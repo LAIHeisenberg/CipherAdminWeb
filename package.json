@@ -1,8 +1,8 @@
 {
-  "name": "eladmin-web",
+  "name": "CipherAdminWeb",
   "version": "2.6.0",
-  "description": "ELADMIN 前端源码",
-  "author": "Zheng Jie",
+  "description": "CipherAdmin 前端源码",
+  "author": "longmai",
   "license": "Apache-2.0",
   "scripts": {
     "dev": "vue-cli-service serve",
@@ -21,10 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/elunez/eladmin-web.git"
-  },
-  "bugs": {
-    "url": "https://github.com/elunez/eladmin/issues"
+    "url": "git@192.168.1.160:cipheradmin/CipherAdminWeb.git"
   },
   "dependencies": {
     "@riophae/vue-treeselect": "^0.4.0",
@@ -81,7 +78,6 @@
     "eslint-plugin-vue": "5.2.2",
     "html-webpack-plugin": "3.2.0",
     "http-proxy-middleware": "^0.19.1",
-    "husky": "1.3.1",
     "lint-staged": "8.1.5",
     "plop": "2.3.0",
     "sass": "1.32.13",
